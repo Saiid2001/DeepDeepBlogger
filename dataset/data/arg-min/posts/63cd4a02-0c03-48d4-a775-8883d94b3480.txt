@@ -1,0 +1,20 @@
+<article class="post-content">
+<h2 id="table-of-contents">Table of Contents.</h2>
+<ol>
+<li><a href="http://www.argmin.net/2018/01/29/taxonomy/">Make It Happen.</a> Reinforcement Learning as prescriptive analytics.</li>
+<li><a href="http://www.argmin.net/2018/02/01/control-tour/">Total Control.</a> Reinforcement Learning as Optimal Control.</li>
+<li><a href="http://www.argmin.net/2018/02/05/linearization/">The Linearization Principle.</a> If a machine learning algorithm does crazy things when restricted to linear models, it’s going to do crazy things on complex nonlinear models too.</li>
+<li><a href="http://www.argmin.net/2018/02/08/lqr/">The Linear Quadratic Regulator.</a> A quick intro to LQR as why it is a great baseline for benchmarking Reinforcement Learning.</li>
+<li><a href="http://www.argmin.net/2018/02/14/rl-game/">A Game of Chance to You to Him Is One of Real Skill.</a> Laying out the rules of the RL Game and comparing to Iterative Learning Control.</li>
+<li><a href="http://www.argmin.net/2018/02/20/reinforce/">The Policy of Truth.</a> Policy Gradient is a Gradient Free Optimization Method.</li>
+<li><a href="http://www.argmin.net/2018/02/26/nominal/">A Model, You Know What I Mean?</a> Nominal control and the power of models.</li>
+<li><a href="http://www.argmin.net/2018/03/13/pg-saga/">Updates on Policy Gradients.</a> Can we fix policy gradient with algorithmic enhancements?</li>
+<li><a href="http://www.argmin.net/2018/03/20/mujocoloco/">Clues for Which I Search and Choose.</a> Simple methods solve apparently complex RL benchmarks.</li>
+<li><a href="http://www.argmin.net/2018/04/19/pid/">The Best Things in Life Are Model Free.</a> PID control and its connection to optimization methods popular in machine learning.</li>
+<li><a href="http://www.argmin.net/2018/04/24/ilc/">Catching Signals That Sound in the Dark.</a> PID for iterative learning control.</li>
+<li><a href="http://www.argmin.net/2018/05/02/adp/">Lost Horizons.</a> Relating popular techniques from RL to methods from Model Predictive Control.</li>
+<li><a href="http://www.argmin.net/2018/05/11/coarse-id-control/">Coarse-ID Control.</a> Combining high-dimensional statistics and robust optimization for the data-driven control of uncertain systems.</li>
+<li><a href="http://www.argmin.net/2018/06/25/rl-tour-fin/">Towards Actionable Intelligence.</a></li>
+</ol>
+<p><strong>Bonus Post:</strong> <a href="http://www.argmin.net/2018/03/26/performance-profiles">Benchmarking Machine Learning with Performance Profiles</a>. The Five Percent Nation of Atari Champions.</p>
+</article>

@@ -1,0 +1,92 @@
+<article class="post-content">
+<p><em>This is the tenth part of <a href="http://www.argmin.net/outsider-rl.html">“An Outsider’s Tour of Reinforcement Learning.”</a>  Part 11 is <a href="http://www.argmin.net/2018/04/24/ilc/">here</a>. Part 9 is <a href="http://www.argmin.net/2018/03/20/mujocoloco/">here</a>. Part 1 is <a href="http://www.argmin.net/2018/01/29/taxonomy/">here</a>.</em></p>
+<p>Though I’ve spent the last few posts casting shade at model-free methods for reinforcement learning, I am not blindly against the model-free paradigm. In fact, the most popular methods in core control systems are model free! The most ubiquitous control scheme out there is PID control, and PID has only three parameters. I’d like to use this post to briefly describe PID control, explain how it is closely connected to many of the most popular methods in machine learning, and then turn to explain what PID brings to the table over the model-free methods that drive contemporary RL research.</p>
+<h2 id="pid-in-a-nutshell">PID in a nutshell</h2>
+<p>PID stands for “proportional integral derivative” control. The idea behind PID control is pretty simple: suppose you have some dynamical system with a single input that produces a single output. In controls, we call the system we’d like to control <em>the plant</em>, a term that comes from chemical process engineering. Let’s say you’d like the output of your plant to read some constant value $y_t = v$. For instance, you’d like to keep the water temperature in your espresso machine at precisely <a href="http://espressovivace.com/education/espresso-tips/">203 degrees Fahrenheit</a>, but you don’t have a precise differential equation modeling your entire kitchen. PID control works by creating a control signal based on the error $e_t=v-y_t$.  As the name implies, the control signal is a combination of error, its derivative, and its integral:</p>
+
+\[u_t = k_P e_t + k_I \int_0^t e_s ds + k_D \dot{e}_t\,.\]
+
+<p>I’ve heard differing accounts, but somewhere in the neighborhood of <a href="https://pdfs.semanticscholar.org/5d1a/2f4b06bc4e5714be1948099c2cb7b3236d42.pdf#page=177">95 percent</a> of all control systems are PID. And some suggest that the number of people using the “D” term is negligible. Something like 95 percent of the myriad collection of control processes that keep our modern society running are configured by setting <em>two</em> parameters. This includes those <a href="https://home.lamarzoccousa.com/history-of-the-pid/">third wave espresso machines</a> that fuel so much great research.</p>
+<p class="center"><img alt="get that temp stable" height="240px" src="/assets/rl/pid/silvia-pid.jpg"/>
+<img alt="oscillating" height="240px" src="/assets/rl/pid/PIDGraph.png"/></p>
+<p>In some sense, PID control is the “gradient descent” of control: it solves most problems and fancier methods are only needed for special cases. The odd thing about statistics and ML research these days is that everyone knows about gradient descent, but almost none of the ML researchers I’ve spoken to know anything about PID control. So perhaps to explain the ubiquity of PID control to the ML crowd, it might be useful to establish some connections to gradient descent.</p>
+<h2 id="pid-in-discrete-time">PID in discrete time</h2>
+<p>Before we proceed, let’s first make the PID controller digital. We all design their controllers in discrete time rather than continuous time since we do things on computers. How can we discretize the PID controller?  First, we can compute the integral term with a running sum:</p>
+
+\[w_{t+1} = w_t + e_t\]
+
+<p>When $w_0=0$, then $w_t$ is the sum of the sequence $e_s$ for $s&lt;t$.</p>
+<p>The derivative term can be approximated by finite differences. But since taking derivatives can amplify noise, most practical PID controllers actually filter the derivative term to damp this noise. A simple way to filter the noise is to let the derivative term be a running average:</p>
+
+\[v_{t} = \beta v_{t-1} + (1-\beta)(e_t-e_{t-1})\,.\]
+
+<p>Putting everything together, a PID controller in discrete time will take the form</p>
+
+\[u_t = k_P e_t + k_I w_t + k_D v_t\]
+
+<h2 id="integral-control">Integral Control</h2>
+<p>Let’s now look at pure integral control. We can simplify the controller in this case to one simple update formula:</p>
+
+\[u_t = u_{t-1}+k_i e_t\,.\]
+
+<p>This should look very familiar to all of my ML friends out there as it looks an <em>awful lot</em> like gradient descent. To make the connection crisp, suppose that the plant we’re trying to control takes an input $u$ and then spits out the output $y= f’(u)$ for some fixed function $f$. If we want to drive $y_t$ to zero, then the error signal $e$ takes the form $e = -f’(u)$. With this model of the plant, integral control <em>is</em> gradient descent. Just like in gradient descent, integral control can never give you the wrong answer. If you converge to a constant value of the control parameter, then the error must be zero.</p>
+<h2 id="proportional-integral-control">Proportional Integral Control</h2>
+<p>As discussed above, PI control is the most ubiquitous form of control. For optimization, it is less common, but still finds a valid algorithm when $e = -f’(u)$.</p>
+<p>Doing a variable substitution, the $PI$ controller will take the form</p>
+
+\[u_{t+1} = u_t + (k_I-k_P) e_t + k_P e_{t+1}\]
+
+<p>If $e_t = -f’(u_t)$, then we get the algorithm:</p>
+
+\[u_{t+1} + k_P f'(u_{t+1}) = u_t - (k_I-k_P) f'(u_t)\]
+
+<p>This looks a bit tricky as somehow we need to compute the gradient of $f$ at our current time step. However, optimization friends out there will note that this equation is the optimality conditions for the algorithm</p>
+
+\[u_{t+1} = \mathrm{prox}_{k_P f} ( u_t - (k_I-k_P) f'(u_t) )\,.\]
+
+<p>Hence, PI control combines a gradient step with a proximal step. The algorithm is a hybrid between the classical proximal point method and gradient descent. Note that if this method converges, it will again converge to a point where $f’(u)=0$.</p>
+<h2 id="proportional-integral-derivative-control">Proportional Integral Derivative Control</h2>
+<p>The master algorithm is PID. What happens here? Allow me to do a clever change of variables that <a href="http://www.laurentlessard.com/">Laurent Lessard</a> showed to me.  Define the auxiliary variable</p>
+
+\[x_t = \frac{1}{1-\beta}w_t+\frac{\beta}{(1-\beta)^3}v_t-\frac{\beta}{(1-\beta)^2}e_t\,.\]
+
+<p>In terms of this new hidden state, $x_t$, the PID controller reduces to the tidy set of equations:</p>
+
+\[\begin{aligned}
+	x_{t+1} &amp;= (1+\beta)x_t -\beta x_{t-1} + e_t\\
+	u_t &amp;=  C_1 x_t + C_2 x_{t-1}+  C_3 e_t\,,
+\end{aligned}\]
+
+<p>and the coefficients $C_i$ are given by the formulae:</p>
+
+\[\begin{aligned}
+C_1 &amp;= -(1-\beta)^2 k_D+k_I\\
+C_2 &amp;= (1-\beta)^2 k_D-\beta k_I\\
+C_3 &amp;= k_P + (1-\beta) k_D
+\end{aligned}\]
+
+<p>The $x_{t}$ sequence looks like a <em>momentum</em> sequence used in optimization. Indeed, with proper settings of the gains, we can recover a variety of algorithms that we commonly use in machine learning. <em>Gradient descent with momentum</em> with learning rate $\alpha$—-also known as the <em>Heavy Ball method</em>—is realized with the settings.</p>
+
+\[k_I = \frac{\alpha}{1-\beta}\,, ~~~~
+  k_D=\frac{\alpha \beta}{(1-\beta)^3} \,, ~~~~
+  k_P = \frac{-\alpha \beta}{(1-\beta)^2}\]
+
+<p>Nesterov’s accelerated method pops out when we set</p>
+
+\[k_I = \frac{\alpha}{1-\beta} ~~~~ k_D=\frac{\alpha \beta^2}{(1-\beta)^3}~~~~ k_P = \frac{-\alpha \beta^2}{(1-\beta)^2}\]
+
+<p>These are remarkably similar, differing only in the power of $\beta$ in the numerator of the proportional and derivative terms.</p>
+<h2 id="the-lure-problem">The Lur’e Problem</h2>
+<p>Laurent blew my mind when he showed me the connection between PID control and optimization algorithms. How crazy is it that most of the popular algorithms in ML end up being special cases of PID control?  And I imagine that if we went out and did surveys of industrial machine learning, we’d find that 95% of the machine learning models in production were trained using some sort of gradient descent. Hence, there’s yet another feather in the cap for PID.</p>
+<p>It turns out that the problem of feedback with a static, nonlinear map has a long history in controls, and this problem even has a special name: <a href="https://en.wikipedia.org/wiki/Nonlinear_control#Nonlinear_feedback_analysis_%E2%80%93_The_Lur'e_problem">the Lur’e problem</a>. Finding a controller to push a static nonlinear system to a fixed point turns out to be identical to designing an optimization algorithm to set a gradient to zero.</p>
+<p class="center"><img alt="parallels between optimization and control" src="/assets/rl/pid/lureloop.png" width="560px"/></p>
+<p>Laurent Lessard,  Andy Packard, and I made these connections in <a href="https://arxiv.org/abs/1408.3595">our paper</a>, showing that many of the rates of convergence for optimization algorithms could be derived using stability techniques from controls. We also used this approach to show that the Heavy Ball method might not always converge at an accelerated rate, justifying why we need the slightly more complicated Nesterov accelerated method for reliable performance. Indeed, we found settings where the Heavy Ball method for quadratics converged linearly, but on general convex functions didn’t converge at all. Even though these methods barely differ from each other in terms of how you set the parameters, this subtle change is the difference between convergence and oscillation!</p>
+<p class="center"><img alt="Heavy Ball isn’t stable" src="/assets/rl/pid/hbcycle.png" width="560px"/></p>
+<p>With Robert Nishihara and Mike Jordan, we followed up this work showing that you could even use this to <a href="https://arxiv.org/abs/1502.02009">study ADMM using the connections between prox-methods and proportional integral control</a>. Bin Hu, Pete Seiler, and Anders Rantzer <a href="https://arxiv.org/abs/1706.08141">generalized this technique to better understand stochastic optimization methods</a>. And Laurent and Bin <a href="https://arxiv.org/abs/1703.01670">made the formal connections to PID control</a> that I discuss in this post.</p>
+<h2 id="learning-to-learn">Learning to learn</h2>
+<p>With the connection to PID control in mind, we can think of learning rate tuning as controller tuning. The Nichols-Ziegler rules (developed in the forties) simply find the largest gain $k_P$ such that the system oscillates, and set the PID parameters based on this gain and the frequency of the oscillations. A common trick for gradient descent tuning is to find the largest value such that gradient descent does not diverge, and then set the momentum and learning rate accordingly from this starting point.</p>
+<p>Similarly,  we can think of the “learning to learn” paradigm in machine learning as a special case of controller design. Though PID works for most applications, it’s possible that a more complex controller will work for a particular application. In the same vein, it’s always possible that there’s something better than Nesterov’s method if you restrict your set of instances. And maybe you can even find this controller by gradient descent. But it’s always good to remember, 95% is still PID.</p>
+<p>I make these connections for the following reason: both in the case of gradient descent and PID control, we can only prove reasonable behavior in rather constrained settings: in PID we understand how to analyze certain nonlinear control systems, but not all of them.  In optimization, we understand the behavior on convex functions and problems that are “nearly” convex. Obviously, we can’t hope to have simple methods to stabilize <em>all</em> possible plants/functions (or else we’re violating some serious conjectures in complexity theory), but we can show that our methods work on simple cases, and performance degrades gracefully as we add complexity to the problem.</p>
+<p>Moreover, the simple cases give us a body of techniques for general design: by developing theory on specific cases we can developing intuition and probe fundamental limits. I think the same thing needs to be established for general reinforcement learning, and it’s why I’ve been spending so much time on LQR and nearby generalizations.</p>
+<p>Let’s take this perspective for PID. Though PID is a powerful workhorse, it is typically thought of to only be useful for simple low-level control loops attempting to maintain some static equilibrium. It seems like it’s not particularly useful for more complex tasks like robotic acrobatics. However, <a href="http://www.argmin.net/2018/04/24/ilc/">in the next post, I will describe a more complex control task that can also be solved by PID-type techniques.</a></p>
+</article>

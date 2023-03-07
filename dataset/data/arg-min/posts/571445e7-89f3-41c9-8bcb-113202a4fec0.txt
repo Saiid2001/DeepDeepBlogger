@@ -1,0 +1,13 @@
+<article class="post-content">
+<p>David Bazan of Pedro the Lion fame just released a fantastic new record <em>Blanco</em>, and “Both Hands” is the leadoff track.</p>
+<iframe allowtransparency="true" frameborder="0" height="380" src="https://embed.spotify.com/?uri=spotify:track:7qXAvcB4enZGEBBxu8GnTw" width="300"></iframe>
+<p>I haven’t followed Bazan’s work since Pedro the Lion, but in the interim he’s shifted away from emo indie rock to washed out synth pop.  There is a heavy low-pass filter over all of the instrumentation, and this makes for an appropriate pairing with Bazan’s disaffected baritone.</p>
+<blockquote>
+<p>If I’m not losing sleep/
+I’m probably over it.</p>
+</blockquote>
+<p>I know how you feel, David.</p>
+<p>For those of you without Spotify, you can check out Track 2, <em>Oblivion</em> on Bazan’s Soundcloud:</p>
+<iframe frameborder="no" height="166" scrolling="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/263460958&amp;color=ff5500&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false" width="100%"></iframe>
+<p>This song is also very high quality.</p>
+</article>
